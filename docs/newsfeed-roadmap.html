@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html{color-scheme:light dark}body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+<title>뉴스피드 확장 로드맵</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  /* 레이아웃: 한 줄 폭 720px 안에 단계가 세로로 이어지고, 다이어그램만 그 폭을 꽉 쓴다 */
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --fg: #1c2733;
+  --muted: #5f6b7a;
+  --line: #d3dae3;
+  --accent: #0c7a8a;
+  --accent-soft: #dcf1f4;
+  --warn: #9a5b0a;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f151b; --surface: #171f28; --fg: #e4eaf0; --muted: #9aa7b5; --line: #2a3542;
+    --accent: #4cc3d4; --accent-soft: #10303a; --warn: #e2a24a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f151b; --surface: #171f28; --fg: #e4eaf0; --muted: #9aa7b5; --line: #2a3542;
+  --accent: #4cc3d4; --accent-soft: #10303a; --warn: #e2a24a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.65;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+.wrap { max-width: 760px; margin: 0 auto; }
+header.wrap { padding-block: 48px 24px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin: 0 0 10px; }
+h1 { font-size: 30px; line-height: 1.25; margin: 0 0 14px; font-weight: 700; text-wrap: balance; }
+.lead { color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+.legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin: 0 0 24px; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.sw { width: 18px; height: 12px; border-radius: 3px; border: 1.2px solid currentColor; background: var(--surface); }
+.sw.new { border: 1.6px solid var(--accent); background: var(--accent-soft); }
+.toc { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 18px; }
+.toc a { display: grid; grid-template-columns: 26px 1fr; grid-template-rows: auto auto; column-gap: 8px; text-decoration: none; color: inherit; padding: 6px 0; border-radius: 6px; }
+.toc a:hover .toc-t, .toc a:focus-visible .toc-t { text-decoration: underline; }
+.toc-n { grid-row: 1 / span 2; font-family: var(--font-mono); font-size: 13px; color: var(--accent); padding-top: 2px; }
+.toc-t { font-weight: 500; font-size: 14px; }
+.toc-s { font-size: 12.5px; color: var(--muted); }
+.phase { font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; color: var(--muted); margin: 44px auto 0; max-width: 760px; padding-top: 14px; border-top: 1px dashed var(--line); }
+.step { max-width: 760px; margin: 20px auto 0; padding: 24px 0 8px; }
+.step + .step { border-top: 1px solid var(--line); margin-top: 28px; }
+.step-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; margin-bottom: 10px; }
+.num { font-family: var(--font-mono); font-size: 13px; color: var(--accent); font-weight: 500; }
+h2 { font-size: 21px; margin: 0; font-weight: 700; text-wrap: balance; }
+.tag { font-size: 12.5px; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 2px 10px; white-space: nowrap; }
+.signal { margin: 0 0 16px; color: var(--muted); max-width: 66ch; }
+.signal strong, .codeline strong { display: block; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--warn); font-weight: 600; margin-bottom: 1px; }
+figure { margin: 0 0 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 16px 12px; }
+.fig-scroll { overflow-x: auto; }
+figure svg { display: block; width: 100%; height: auto; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 10px; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+.cols h3 { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 6px 0 4px; font-weight: 600; }
+.cols ul { margin: 0; padding-left: 18px; }
+.cols li { margin: 4px 0; font-size: 14.5px; }
+.cols > div { min-width: 0; }
+.why { margin: 18px 0 0; padding: 14px 18px 12px; border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0 8px 8px 0; }
+.why h3 { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 0 0 6px; font-weight: 600; }
+.why ul { margin: 0; padding-left: 18px; }
+.why li { margin: 6px 0; font-size: 14px; }
+.why b { font-weight: 600; }
+.codeline { margin: 14px 0 0; font-size: 14px; }
+code { font-family: var(--font-mono); font-size: .88em; background: var(--accent-soft); color: var(--fg); padding: 1px 5px; border-radius: 4px; }
+sup { font-size: .7em; }
+.summary { max-width: 760px; margin: 56px auto 0; }
+.summary h2 { margin-bottom: 12px; }
+.tbl-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 820px; font-size: 13.5px; }
+th, td { text-align: left; padding: 9px 12px; vertical-align: top; border-top: 1px solid var(--line); }
+th { font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-top: 0; font-weight: 600; }
+td:first-child { font-family: var(--font-mono); color: var(--accent); font-variant-numeric: tabular-nums; }
+td:nth-child(2) { white-space: nowrap; font-weight: 500; }
+/* SVG */
+.box { fill: var(--surface); stroke: currentColor; stroke-width: 1.2; }
+.box.new { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.6; }
+.grp { fill: none; stroke: var(--line); stroke-width: 1.2; stroke-dasharray: 6 4; }
+.edge { stroke: currentColor; stroke-width: 1.2; fill: none; }
+.edge.new { stroke: var(--accent); stroke-width: 1.6; }
+.edge.dash { stroke-dasharray: 5 4; }
+.lbl { font-family: var(--font-body); font-size: 12px; fill: currentColor; }
+.sub { font-family: var(--font-mono); font-size: 10.5px; fill: var(--muted); }
+.el { font-family: var(--font-body); font-size: 11px; fill: var(--muted); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
+.el.new { fill: var(--accent); }
+#arr { fill: currentColor; } #arrn { fill: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 560px) {
+  h1 { font-size: 25px; }
+  .cols { grid-template-columns: 1fr; }
+  header.wrap { padding-block: 32px 20px; }
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z"/></marker>
+    <marker id="arrn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z"/></marker>
+  </defs>
+</svg>
+<header class="wrap">
+  <p class="eyebrow">System design · News feed</p>
+  <h1>뉴스피드 확장 로드맵</h1>
+  <p class="lead">조인 쿼리 하나로 피드를 만드는 서버 한 대에서 시작해, 피드를 미리 배달하는 구조로 바꾸고, 셀럽·랭킹·멀티 리전까지 기술을 하나씩 들이는 순서다. 각 단계는 앞 단계의 병목 하나를 풀고, 고른 이유와 탈락한 대안을 함께 적었다. 기준 규모는 DAU 1천만, 피드 조회 피크 6,000 QPS, 게시 23 TPS, 평균 팔로워 200명.</p>
+  <div class="legend"><span><i class="sw"></i>이미 있던 것</span><span><i class="sw new"></i>이 단계에서 새로 들어오는 것</span></div>
+  <ol class="toc"><li><a href="#step-0"><span class="toc-n">0</span><span class="toc-t">Spring Boot + PostgreSQL · pull 모델</span><span class="toc-s">조인 한 번으로 피드를 만든다</span></a></li><li><a href="#step-1"><span class="toc-n">1</span><span class="toc-t">객체 저장소 (S3) + CDN + presigned URL</span><span class="toc-s">이미지를 앱 밖으로</span></a></li><li><a href="#step-2"><span class="toc-n">2</span><span class="toc-t">로드밸런서 + 앱 수평 확장</span><span class="toc-s">앱을 여러 대로</span></a></li><li><a href="#step-3"><span class="toc-n">3</span><span class="toc-t">PostgreSQL 읽기 복제본</span><span class="toc-s">피드 조회를 Primary 에서 뗀다</span></a></li><li><a href="#step-4"><span class="toc-n">4</span><span class="toc-t">Redis 피드 리스트 · fan-out on write</span><span class="toc-s">조회 시 조인 대신 게시 시 배달</span></a></li><li><a href="#step-5"><span class="toc-n">5</span><span class="toc-t">Redis 게시물·사용자 캐시 (MGET hydrate)</span><span class="toc-s">ID 20개를 본문으로</span></a></li><li><a href="#step-6"><span class="toc-n">6</span><span class="toc-t">Kafka + fan-out 워커</span><span class="toc-s">배달을 게시 요청에서 뗀다</span></a></li><li><a href="#step-7"><span class="toc-n">7</span><span class="toc-t">하이브리드 (셀럽은 pull)</span><span class="toc-s">팔로워 100만 명 문제</span></a></li><li><a href="#step-8"><span class="toc-n">8</span><span class="toc-t">DB 샤딩 (posts · follows)</span><span class="toc-s">수십억 행을 나눈다</span></a></li><li><a href="#step-9"><span class="toc-n">9</span><span class="toc-t">랭킹 (피처 저장소 + 배치)</span><span class="toc-s">시간순에서 점수순으로</span></a></li><li><a href="#step-10"><span class="toc-n">10</span><span class="toc-t">Redis 카운터 + 이벤트 원장</span><span class="toc-s">좋아요 수를 DB 에서 뗀다</span></a></li><li><a href="#step-11"><span class="toc-n">11</span><span class="toc-t">미디어 처리 워커 (libvips)</span><span class="toc-s">이 시스템의 유일한 CPU 바운드 구간</span></a></li><li><a href="#step-12"><span class="toc-n">12</span><span class="toc-t">GeoDNS + 멀티 리전 + API Gateway</span><span class="toc-s">지리적 확장과 남용 방어</span></a></li></ol>
+</header>
+<main>
+
+<p class="phase">Stage 0 · 단일 서버</p>
+<section class="step" id="step-0">
+  <div class="step-head">
+    <span class="num">Step 0</span>
+    <h2>조인 한 번으로 피드를 만든다</h2>
+    <span class="tag">도입 · Spring Boot + PostgreSQL · pull 모델</span>
+  </div>
+  <p class="signal"><strong>넘어가는 신호</strong>시작점. 게시·팔로우·피드 세 유스케이스를 가장 단순한 저장 구조로 굳힌다.</p>
+  <figure>
+    <div class="fig-scroll"><svg viewBox="0 0 720 120" role="img" aria-label="클라이언트가 앱 한 대에 피드를 요청하면 앱이 팔로우 테이블과 게시물 테이블을 조인해서 돌려준다" style="max-width:720px;min-width:520px" xmlns="http://www.w3.org/2000/svg"><rect class="box" x="20" y="34" width="130" height="52" rx="6"/><text class="lbl" x="85.0" y="64.0" text-anchor="middle">Client</text><line class="edge" x1="150" y1="60" x2="250" y2="60" marker-end="url(#arr)"/><text class="el" x="200.0" y="53.0" text-anchor="middle">GET /api/feed</text><rect class="box new" x="250" y="34" width="170" height="52" rx="6"/><text class="lbl" x="335.0" y="57.0" text-anchor="middle">Spring Boot</text><text class="sub" x="335.0" y="73.0" text-anchor="middle">pull: follows ⋈ posts</text><line class="edge new" x1="420" y1="60" x2="520" y2="60" marker-end="url(#arrn)"/><text class="el new" x="470.0" y="53.0" text-anchor="middle">JOIN + ORDER BY</text><rect class="box new" x="520" y="34" width="180" height="52" rx="6"/><text class="lbl" x="610.0" y="57.0" text-anchor="middle">PostgreSQL</text><text class="sub" x="610.0" y="73.0" text-anchor="middle">users · follows · posts</text></svg></div>
+    <figcaption>클라이언트가 앱 한 대에 피드를 요청하면 앱이 팔로우 테이블과 게시물 테이블을 조인해서 시간 역순 20개를 돌려준다.</figcaption>
+  </figure>
+  <div class="cols">
+    <div><h3>얻는 것</h3><ul><li>테이블 세 개 (<code>users</code>, <code>follows</code>, <code>posts</code>) 와 쿼리 하나로 전체 기능이 돈다.</li><li>게시물 ID 를 시간순 정렬 가능한 64bit (Snowflake 류) 로 발급해 커서 페이지네이션을 처음부터 쓴다. <code>OFFSET</code> 은 깊어질수록 느려진다.</li><li>이 단계에서 <code>PostRepository</code>, <code>FollowRepository</code>, <code>FeedSource</code>, <code>PostCache</code>, <code>FanoutPublisher</code>, <code>MediaStore</code> 포트를 둔다. 이후 모든 단계는 구현체만 바꾼다.</li></ul></div>
+    <div><h3>대가</h3><ul><li>피드 쿼리 비용이 팔로우 수에 비례한다. 팔로우 500명이면 500명의 최신 글을 모아 정렬해야 한다. 팔로우가 많은 사용자부터 느려진다.</li><li>이미지가 아직 DB 나 앱 디스크에 있다. 다음 단계에서 바로 뺀다.</li></ul></div>
+  </div>
+  <div class="why">
+    <h3>왜 이 기술인가</h3>
+    <ul><li><b>언어·프레임워크</b> URL 단축기와 같은 결정이다. 뉴스피드도 I/O 바운드다. 피드 조회는 Redis·DB 응답 대기가 전부이고 CPU 는 JSON 직렬화 정도다. 그래서 원시 성능이 아니라 이후 12단계의 통합 폭과 인력으로 JVM + Spring Boot 를 고른다. 예외가 하나 있는데 Step 11 의 이미지 처리다. 그건 CPU 바운드라 앱 밖으로 뺀다.</li><li><b>PostgreSQL 을 고른 이유</b> 초기 데이터 모델이 관계형이다. 팔로우는 다대다, 피드는 조인. 외래 키·유니크 제약·트랜잭션이 바로 필요하다.</li><li><b>대안 · Cassandra / DynamoDB 로 시작</b> 타임라인 저장에는 잘 맞지만 Step 0 의 조인 쿼리를 못 쓴다. 처음부터 fan-out 을 짜야 해서 시작 비용이 크다. Step 8 에서 피드 영속화가 필요해지면 재고한다.</li><li><b>대안 · 그래프 DB (Neo4j)</b> 팔로우 그래프 탐색에 좋아 보이지만 피드는 2홉 이상 탐색이 없다. 1홉 조인이면 RDB 가 더 빠르고 운영이 쉽다.</li><li><b>pull 모델로 시작하는 이유</b> 가장 단순하고 저장 공간이 최소다. 팔로우 수가 적을 때는 조인 쿼리가 수 ms 다. fan-out 은 Step 4 에서 이 쿼리가 실제로 느려지는 걸 측정한 뒤 넣는다. 처음부터 push 로 가면 Redis·큐·워커가 Step 0 에 들어와 측정할 기준점이 없다.</li><li><b>시간순 정렬 ID 를 처음부터 쓰는 이유</b> 커서 페이지네이션 (<code>WHERE id &lt; :cursor ORDER BY id DESC LIMIT 20</code>) 은 인덱스 한 번으로 끝나고, Step 4 의 Redis 리스트에서도 ID 만으로 정렬·머지가 된다. <code>OFFSET</code> 은 페이지가 깊어질수록 건너뛴 행을 전부 읽는다. UUIDv7 또는 Snowflake 변형이면 된다.</li></ul>
+  </div>
+  <p class="codeline"><strong>코드에서 바뀌는 것</strong><code>GetHomeFeed</code> 가 <code>FeedSource</code> 포트를 호출하고, 구현은 <code>PullFeedSource</code> (조인 쿼리). <code>FanoutPublisher</code> 는 아직 <code>Noop</code>.</p>
+</section>
+
+<section class="step" id="step-1">
+  <div class="step-head">
+    <span class="num">Step 1</span>
+    <h2>이미지를 앱 밖으로</h2>
+    <span class="tag">도입 · 객체 저장소 (S3) + CDN + presigned URL</span>
+  </div>
+  <p class="signal"><strong>넘어가는 신호</strong>업로드 트래픽이 앱 서버 대역폭과 디스크를 잡아먹고, 이미지 응답이 피드 API 의 지연을 끌어올릴 때. 사실상 Step 0 직후.</p>
+  <figure>
+    <div class="fig-scroll"><svg viewBox="0 0 760 200" role="img" aria-label="클라이언트가 서명된 URL 로 객체 저장소에 직접 올리고, 앱과 DB 는 이미지 URL 만 다룬다. 서빙은 CDN 이 한다" style="max-width:760px;min-width:520px" xmlns="http://www.w3.org/2000/svg"><rect class="box" x="20" y="74" width="130" height="52" rx="6"/><text class="lbl" x="85.0" y="104.0" text-anchor="middle">Client</text><line class="edge" x1="150" y1="100" x2="260" y2="100" marker-end="url(#arr)"/><text class="el" x="205.0" y="93.0" text-anchor="middle">① presign 요청</text><rect class="box" x="260" y="74" width="130" height="52" rx="6"/><text class="lbl" x="325.0" y="97.0" text-anchor="middle">Spring Boot</text><text class="sub" x="325.0" y="113.0" text-anchor="middle">메타데이터만</text><line class="edge new" x1="150" y1="90" x2="260" y2="40" marker-end="url(#arrn)"/><text class="el new" x="170" y="50" text-anchor="middle">② PUT 원본 직접 업로드</text><rect class="box new" x="260" y="14" width="170" height="52" rx="6"/><text class="lbl" x="345.0" y="37.0" text-anchor="middle">S3 · 객체 저장소</text><text class="sub" x="345.0" y="53.0" text-anchor="middle">원본 이미지</text><line class="edge" x1="325" y1="74" x2="325" y2="66" marker-end="url(#arr)"/><line class="edge new" x1="430" y1="40" x2="540" y2="40" marker-end="url(#arrn)"/><text class="el new" x="485.0" y="33.0" text-anchor="middle">origin</text><rect class="box new" x="540" y="14" width="130" height="52" rx="6"/><text class="lbl" x="605.0" y="37.0" text-anchor="middle">CDN</text><text class="sub" x="605.0" y="53.0" text-anchor="middle">이미지 서빙</text><line class="edge" x1="390" y1="100" x2="540" y2="100" marker-end="url(#arr)"/><text class="el" x="465.0" y="93.0" text-anchor="middle">③ URL 만 INSERT</text><rect class="box" x="540" y="74" width="160" height="52" rx="6"/><text class="lbl" x="620.0" y="97.0" text-anchor="middle">PostgreSQL</text><text class="sub" x="620.0" y="113.0" text-anchor="middle">posts.media_url</text></svg></div>
+    <figcaption>클라이언트가 서명된 URL 로 객체 저장소에 직접 올리고, 앱과 DB 는 이미지 URL 만 다룬다. 서빙은 CDN 이 한다.</figcaption>
+  </figure>
+  <div class="cols">
+    <div><h3>얻는 것</h3><ul><li>앱 서버가 바이너리를 만지지 않는다. 업로드 200KB × 초당 수백 건이 앱을 거치지 않는다.</li><li>하루 400GB 의 미디어가 DB 와 분리된다. DB 는 메타데이터 1KB 만 받는다.</li><li>CDN 캐시 히트가 90% 이상이면 원본 저장소 트래픽은 1/10.</li></ul></div>
+    <div><h3>대가</h3><ul><li>업로드가 2단계 (presign → PUT) 로 늘어 클라이언트가 복잡해진다.</li><li>업로드만 하고 게시를 안 한 고아 객체가 생긴다. 수명 주기 정책으로 24시간 뒤 삭제.</li></ul></div>
+  </div>
+  <div class="why">
+    <h3>왜 이 기술인가</h3>
+    <ul><li><b>객체 저장소를 고른 이유</b> 이미지는 불변·대용량·순차 읽기다. 블록 저장소나 DB 가 아니라 객체 저장소의 설계 목적 그대로다. GB 당 월 2센트대로 가장 싸고 내구성이 11 nines 다.</li><li><b>대안 · DB 에 BLOB</b> 백업·복제·VACUUM 이 전부 이미지 크기만큼 느려진다. 하루 400GB 면 DB 가 일주일 만에 TB 를 넘는다.</li><li><b>대안 · 앱 서버 디스크</b> 수평 확장 (Step 2) 과 양립하지 않는다. 어느 서버에 있는지 찾아야 한다.</li><li><b>presigned URL 을 고른 이유</b> 앱 서버를 거치는 업로드는 대역폭·메모리·커넥션을 바이너리 크기만큼 쓴다. 서명된 URL 은 권한 검사만 앱이 하고 바이트는 클라이언트와 저장소 사이에서 직접 흐른다. 대안인 <b>앱 프록시 업로드</b> 는 바이러스 검사 등 즉시 처리가 필요할 때만 선택한다.</li><li><b>CDN 을 지금 넣는 이유</b> 이미지는 302 와 달리 캐시 가능한 정적 자원이고, 피드 한 화면에 20장이 뜬다. 피드 API 1건에 이미지 요청 20건이 따라오므로 CDN 없이는 저장소 트래픽이 API 의 20배다. CloudFront / Cloudflare 어느 쪽이든 된다.</li></ul>
+  </div>
+  <p class="codeline"><strong>코드에서 바뀌는 것</strong><code>MediaStore</code> 포트의 구현 <code>S3MediaStore</code> (presign 발급). <code>PublishPost</code> 는 URL 만 받는다.</p>
+</section>
+<p class="phase">Stage 1 · 읽기 확장</p>
+<section class="step" id="step-2">
+  <div class="step-head">
+    <span class="num">Step 2</span>
+    <h2>앱을 여러 대로</h2>
+    <span class="tag">도입 · 로드밸런서 + 앱 수평 확장</span>
+  </div>
+  <p class="signal"><strong>넘어가는 신호</strong>앱 CPU 70% 이상, 배포 다운타임. 피크 6,000 QPS 를 2 vCPU 한 대가 못 받는다.</p>
+  <figure>
+    <div class="fig-scroll"><svg viewBox="0 0 720 220" role="img" aria-label="로드밸런서가 무상태 앱 세 대로 요청을 나누고, 세 대 모두 같은 PostgreSQL 을 본다" style="max-width:720px;min-width:520px" xmlns="http://www.w3.org/2000/svg"><rect class="box" x="20" y="84" width="130" height="52" rx="6"/><text class="lbl" x="85.0" y="114.0" text-anchor="middle">Client</text><line class="edge" x1="150" y1="110" x2="210" y2="110" marker-end="url(#arr)"/><text class="el" x="180.0" y="103.0" text-anchor="middle">HTTPS</text><rect class="box new" x="210" y="84" width="130" height="52" rx="6"/><text class="lbl" x="275.0" y="107.0" text-anchor="middle">로드밸런서</text><text class="sub" x="275.0" y="123.0" text-anchor="middle">ALB · L7</text><line class="edge new" x1="340" y1="110" x2="420" y2="40" marker-end="url(#arrn)"/><line class="edge new" x1="340" y1="110" x2="420" y2="110" marker-end="url(#arrn)"/><text class="el new" x="380.0" y="103.0" text-anchor="middle">JWT · 무상태</text><line class="edge new" x1="340" y1="110" x2="420" y2="180" marker-end="url(#arrn)"/><rect class="box" x="420" y="14" width="130" height="52" rx="6"/><text class="lbl" x="485.0" y="37.0" text-anchor="middle">App #1</text><text class="sub" x="485.0" y="53.0" text-anchor="middle">Spring Boot</text><rect class="box" x="420" y="84" width="130" height="52" rx="6"/><text class="lbl" x="485.0" y="107.0" text-anchor="middle">App #2</text><text class="sub" x="485.0" y="123.0" text-anchor="middle">Spring Boot</text><rect class="box" x="420" y="154" width="130" height="52" rx="6"/><text class="lbl" x="485.0" y="177.0" text-anchor="middle">App #3</text><text class="sub" x="485.0" y="193.0" text-anchor="middle">Spring Boot</text><line class="edge" x1="550" y1="40" x2="600" y2="100" marker-end="url(#arr)"/><line class="edge" x1="550" y1="110" x2="600" y2="110" marker-end="url(#arr)"/><line class="edge" x1="550" y1="180" x2="600" y2="120" marker-end="url(#arr)"/><rect class="box" x="600" y="84" width="110" height="52" rx="6"/><text class="lbl" x="655.0" y="114.0" text-anchor="middle">PostgreSQL</text></svg></div>
+    <figcaption>로드밸런서가 무상태 앱 세 대로 요청을 나누고, 세 대 모두 같은 PostgreSQL 을 본다.</figcaption>
+  </figure>
+  <div class="cols">
+    <div><h3>얻는 것</h3><ul><li>앱 단일 장애점 제거, 롤링 배포.</li><li>인증을 JWT 로 두어 세션 저장소 없이 무상태를 유지한다.</li></ul></div>
+    <div><h3>대가</h3><ul><li>병목이 DB 로 옮겨 간다. 피드 조인 쿼리가 앱 대수만큼 DB 를 두드린다.</li><li>커넥션 수가 대수에 비례. 풀 상한을 잡는다.</li></ul></div>
+  </div>
+  <div class="why">
+    <h3>왜 이 기술인가</h3>
+    <ul><li><b>L7 로드밸런서</b> URL 단축기와 같다. 이후 경로별 라우팅과 헬스체크가 필요하다.</li><li><b>JWT 로 무상태를 만드는 이유</b> 세션을 서버 메모리에 두면 같은 서버로만 가야 한다 (sticky session). 세션 저장소 (Redis) 를 두는 것도 방법이지만 Step 4 전까지 Redis 를 들이지 않으려면 JWT 가 가장 얇다. 로그아웃·폐기가 필요해지면 짧은 만료 + 리프레시 토큰으로 푼다.</li><li><b>대안 · 수직 확장</b> 더 큰 인스턴스. 배포 다운타임과 단일 장애점이 그대로다.</li></ul>
+  </div>
+  <p class="codeline"><strong>코드에서 바뀌는 것</strong>코드 변경 없음. Actuator 헬스체크와 graceful shutdown 설정만.</p>
+</section>
+
+<section class="step" id="step-3">
+  <div class="step-head">
+    <span class="num">Step 3</span>
+    <h2>피드 조회를 Primary 에서 뗀다</h2>
+    <span class="tag">도입 · PostgreSQL 읽기 복제본</span>
+  </div>
+  <p class="signal"><strong>넘어가는 신호</strong>Primary CPU 가 피드 조인 쿼리로 포화. 읽기 : 쓰기 = 100 : 1 이라 복제본이 바로 효과를 낸다.</p>
+  <figure>
+    <div class="fig-scroll"><svg viewBox="0 0 620 220" role="img" aria-label="쓰기는 Primary 로, 피드 조회는 비동기 복제된 Replica 로 간다" style="max-width:620px;min-width:520px" xmlns="http://www.w3.org/2000/svg"><rect class="box" x="20" y="84" width="130" height="52" rx="6"/><text class="lbl" x="85.0" y="114.0" text-anchor="middle">App</text><line class="edge" x1="150" y1="100" x2="280" y2="40" marker-end="url(#arr)"/><text class="el" x="200" y="58" text-anchor="middle">게시 · 팔로우 (쓰기)</text><rect class="box" x="280" y="14" width="130" height="52" rx="6"/><text class="lbl" x="345.0" y="37.0" text-anchor="middle">Primary</text><text class="sub" x="345.0" y="53.0" text-anchor="middle">PostgreSQL</text><line class="edge new dash" x1="345" y1="66" x2="345" y2="154" marker-end="url(#arrn)"/><text class="el new" x="358" y="114" text-anchor="start">스트리밍 복제 (비동기)</text><line class="edge new" x1="150" y1="120" x2="280" y2="180" marker-end="url(#arrn)"/><text class="el new" x="200" y="165" text-anchor="middle">피드 조회 (읽기)</text><rect class="box new" x="280" y="154" width="130" height="52" rx="6"/><text class="lbl" x="345.0" y="177.0" text-anchor="middle">Replica ×N</text><text class="sub" x="345.0" y="193.0" text-anchor="middle">읽기 전용</text></svg></div>
+    <figcaption>쓰기는 Primary 로, 피드 조회는 비동기 복제된 Replica 로 간다.</figcaption>
+  </figure>
+  <div class="cols">
+    <div><h3>얻는 것</h3><ul><li>읽기 용량이 Replica 수만큼 는다. 쓰기 23 TPS 는 Primary 혼자 충분하다.</li></ul></div>
+    <div><h3>대가</h3><ul><li>복제 지연 수십 ms. 내가 방금 쓴 글이 내 피드에 안 보이는 창이 생긴다. 작성자 본인 피드는 Primary 를 읽거나 방금 쓴 글을 클라이언트가 끼워 넣는다.</li><li>근본 문제인 팔로우 수 비례 비용은 그대로다. Replica 를 늘려도 쿼리 하나의 지연은 안 줄어든다.</li></ul></div>
+  </div>
+  <div class="why">
+    <h3>왜 이 기술인가</h3>
+    <ul><li><b>Replica 를 캐시보다 먼저 넣는 이유</b> URL 단축기와 순서가 다르다. 단축기는 키 → URL 이라 캐시 한 줄로 끝났지만, 피드 결과는 사용자마다 다르고 매 요청 바뀌어 결과 캐시 히트율이 낮다. 지금 병목은 '조인 쿼리 QPS' 이고 그걸 가장 싸게 늘리는 게 Replica 다.</li><li><b>대안 · 피드 결과 캐시 (사용자별 결과를 60초 캐시)</b> 효과는 있지만 새 글이 60초 늦게 보이고, 활성 사용자 비율이 낮으면 히트율이 떨어진다. Step 4 의 fan-out 이 같은 문제를 구조적으로 풀므로 임시방편은 건너뛴다.</li><li><b>비동기 복제</b> 동기는 쓰기 지연을 늘리고, 요구사항이 최종 일관성이다. 작성자 본인 피드의 read-your-writes 는 애플리케이션에서 처리한다.</li></ul>
+  </div>
+  <p class="codeline"><strong>코드에서 바뀌는 것</strong>라우팅 <code>DataSource</code>. <code>@Transactional(readOnly = true)</code> 면 Replica.</p>
+</section>
+<p class="phase">Stage 2 · 피드 구조 전환</p>
+<section class="step" id="step-4">
+  <div class="step-head">
+    <span class="num">Step 4</span>
+    <h2>조회 시 조인 대신 게시 시 배달</h2>
+    <span class="tag">도입 · Redis 피드 리스트 · fan-out on write</span>
+  </div>
+  <p class="signal"><strong>넘어가는 신호</strong>팔로우 300명 이상 사용자의 피드 p99 가 500ms 를 넘고, Replica 를 늘려도 안 내려올 때. 쿼리 자체가 문제다.</p>
+  <figure>
+    <div class="fig-scroll"><svg viewBox="0 0 760 240" role="img" aria-label="게시할 때 팔로워 각자의 Redis 피드 리스트에 게시물 ID 를 밀어 넣고, 피드 조회는 그 리스트를 읽기만 한다" style="max-width:760px;min-width:520px" xmlns="http://www.w3.org/2000/svg"><rect class="box" x="20" y="14" width="130" height="52" rx="6"/><text class="lbl" x="85.0" y="44.0" text-anchor="middle">작성자</text><line class="edge" x1="150" y1="40" x2="220" y2="40" marker-end="url(#arr)"/><text class="el" x="185.0" y="33.0" text-anchor="middle">POST /posts</text><rect class="box" x="220" y="14" width="130" height="52" rx="6"/><text class="lbl" x="285.0" y="37.0" text-anchor="middle">게시 API</text><text class="sub" x="285.0" y="53.0" text-anchor="middle">동기 fan-out</text><line class="edge" x1="350" y1="30" x2="460" y2="30" marker-end="url(#arr)"/><text class="el" x="405.0" y="23.0" text-anchor="middle">① posts INSERT</text><rect class="box" x="460" y="14" width="120" height="52" rx="6"/><text class="lbl" x="520.0" y="44.0" text-anchor="middle">PostgreSQL</text><line class="edge new" x1="350" y1="50" x2="460" y2="150" marker-end="url(#arrn)"/><text class="el new" x="420" y="95" text-anchor="middle">② 팔로워 200명 피드에 LPUSH</text><rect class="box new" x="460" y="124" width="280" height="52" rx="6"/><text class="lbl" x="600.0" y="147.0" text-anchor="middle">Redis 피드 리스트</text><text class="sub" x="600.0" y="163.0" text-anchor="middle">feed:{userId} → post id ×1000</text><rect class="box" x="20" y="124" width="130" height="52" rx="6"/><text class="lbl" x="85.0" y="154.0" text-anchor="middle">독자</text><line class="edge" x1="150" y1="150" x2="220" y2="150" marker-end="url(#arr)"/><text class="el" x="185.0" y="143.0" text-anchor="middle">GET /feed</text><rect class="box" x="220" y="124" width="130" height="52" rx="6"/><text class="lbl" x="285.0" y="147.0" text-anchor="middle">피드 API</text><text class="sub" x="285.0" y="163.0" text-anchor="middle">DB 조인 없음</text><line class="edge new" x1="350" y1="150" x2="460" y2="150" marker-end="url(#arrn)"/><text class="el new" x="405.0" y="143.0" text-anchor="middle">LRANGE 0 19</text></svg></div>
+    <figcaption>게시할 때 팔로워 각자의 Redis 피드 리스트에 게시물 ID 를 밀어 넣고, 피드 조회는 그 리스트를 읽기만 한다.</figcaption>
+  </figure>
+  <div class="cols">
+    <div><h3>얻는 것</h3><ul><li>피드 조회가 <code>LRANGE</code> 한 번, 1ms 미만. 팔로우 수와 무관해진다.</li><li>읽기 100 : 쓰기 1 비율을 활용한다. 비싼 일을 적게 일어나는 쪽 (게시) 으로 옮긴다.</li><li>리스트는 ID 만 1,000개로 자른다. 사용자당 8KB, DAU 1천만이면 80GB.</li></ul></div>
+    <div><h3>대가</h3><ul><li>게시 비용이 팔로워 수에 비례한다. 팔로워 200명이면 Redis 쓰기 200번. 셀럽은 Step 7 까지 문제로 남는다.</li><li>Redis 피드는 휘발성이다. 비우면 Step 0 의 pull 로 재구성한다. pull 경로를 없애지 않는 이유다.</li><li>언팔로우·삭제 시 피드에서 빼는 작업이 필요하다. 조회 시 필터링으로 느슨하게 처리한다.</li></ul></div>
+  </div>
+  <div class="why">
+    <h3>왜 이 기술인가</h3>
+    <ul><li><b>fan-out on write 를 고른 이유</b> 읽기 : 쓰기 = 100 : 1 이면 비싼 계산을 쓰기 쪽으로 옮기는 게 총비용이 100배 싸다. 트위터·인스타그램이 같은 이유로 같은 구조다.</li><li><b>Redis 리스트를 고른 이유</b> 피드는 '사용자별 최근 N개 ID' 다. <code>LPUSH</code> + <code>LTRIM</code> 으로 O(1) 삽입과 상한 유지가 되고 <code>LRANGE</code> 조회가 1ms 미만이다. 메모리 상주라 fan-out 의 초당 수만 쓰기를 받는다.</li><li><b>대안 · DB 에 feed 테이블 (user_id, post_id)</b> 하루 4억 행 INSERT 와 그만큼의 삭제. 디스크 기반 DB 에서 쓰기 증폭이 감당 안 된다. 인덱스가 끝없이 자란다.</li><li><b>대안 · Cassandra 타임라인 테이블</b> 쓰기에 강하고 영속적이라 유력하다. 지금 안 쓰는 이유는 운영 대상을 하나 더 늘리기 때문이고, Redis 는 Step 5·10 에서 재사용된다. 피드를 영속화해야 할 때 (비활성 사용자 피드 보존) 재고한다.</li><li><b>리스트 vs ZSET</b> ZSET 은 점수 (시간) 로 정렬·중복 제거가 되지만 메모리가 2배다. 시간순 ID 를 쓰면 리스트로 충분하고, Step 6 의 중복 삽입 문제가 커지면 ZSET 으로 바꾼다.</li><li><b>1,000개로 자르는 이유</b> 사용자가 피드를 1,000개 넘게 내려 보는 일은 거의 없다. 그 너머는 pull 폴백. DAU 1천만 × 8KB = 80GB 로 Redis 클러스터 몇 대 안에 들어온다.</li></ul>
+  </div>
+  <p class="codeline"><strong>코드에서 바뀌는 것</strong><code>FeedSource</code> 구현을 <code>RedisFeedSource</code> 로. <code>FanoutPublisher</code> 구현 <code>SyncRedisFanout</code>. pull 구현은 폴백으로 남긴다.</p>
+</section>
+
+<section class="step" id="step-5">
+  <div class="step-head">
+    <span class="num">Step 5</span>
+    <h2>ID 20개를 본문으로</h2>
+    <span class="tag">도입 · Redis 게시물·사용자 캐시 (MGET hydrate)</span>
+  </div>
+  <p class="signal"><strong>넘어가는 신호</strong>피드 ID 는 Redis 에서 받는데 본문 20개를 채우느라 DB 조회가 요청당 20번. Replica 읽기 QPS 가 피드 QPS 의 20배가 될 때.</p>
+  <figure>
+    <div class="fig-scroll"><svg viewBox="0 0 760 200" role="img" aria-label="피드 ID 20개를 한 번의 MGET 으로 게시물 캐시에서 채우고, 미스 난 것만 DB 를 한 번에 묻는다" style="max-width:760px;min-width:520px" xmlns="http://www.w3.org/2000/svg"><rect class="box" x="20" y="74" width="130" height="52" rx="6"/><text class="lbl" x="85.0" y="104.0" text-anchor="middle">피드 API</text><line class="edge" x1="150" y1="90" x2="240" y2="40" marker-end="url(#arr)"/><text class="el" x="190" y="50" text-anchor="middle">① LRANGE → post id 20개</text><rect class="box" x="240" y="14" width="200" height="52" rx="6"/><text class="lbl" x="340.0" y="44.0" text-anchor="middle">Redis 피드 리스트</text><line class="edge new" x1="150" y1="110" x2="240" y2="160" marker-end="url(#arrn)"/><text class="el new" x="190" y="152" text-anchor="middle">② MGET post:{id} ×20</text><rect class="box new" x="240" y="134" width="200" height="52" rx="6"/><text class="lbl" x="340.0" y="157.0" text-anchor="middle">Redis 게시물 캐시</text><text class="sub" x="340.0" y="173.0" text-anchor="middle">post:{id} · user:{id} 해시</text><line class="edge" x1="440" y1="160" x2="540" y2="160" marker-end="url(#arr)"/><text class="el" x="490.0" y="153.0" text-anchor="middle">miss 만 SELECT … IN (…)</text><rect class="box" x="540" y="134" width="120" height="52" rx="6"/><text class="lbl" x="600.0" y="157.0" text-anchor="middle">PostgreSQL</text><text class="sub" x="600.0" y="173.0" text-anchor="middle">Replica</text></svg></div>
+    <figcaption>피드 ID 20개를 한 번의 MGET 으로 게시물 캐시에서 채우고, 미스 난 것만 DB 를 한 번에 묻는다.</figcaption>
+  </figure>
+  <div class="cols">
+    <div><h3>얻는 것</h3><ul><li>요청당 Redis 왕복 2회 (피드 + MGET), DB 는 캐시 미스분만 <code>IN</code> 쿼리 1회.</li><li>최근 글일수록 많이 읽히므로 히트율이 높다. 24시간 TTL 에 95% 이상.</li></ul></div>
+    <div><h3>대가</h3><ul><li>게시물 수정·삭제 시 캐시 무효화. 게시물은 거의 불변이라 <code>DEL</code> 하나로 끝난다.</li><li>좋아요 수처럼 자주 바뀌는 필드를 캐시에 넣으면 무효화가 잦다. Step 10 에서 분리한다.</li></ul></div>
+  </div>
+  <div class="why">
+    <h3>왜 이 기술인가</h3>
+    <ul><li><b>게시물 캐시를 Step 4 다음에 넣는 이유</b> Step 4 가 피드 ID 조회를 Redis 로 옮기면서 DB 부하의 성격이 바뀐다. 조인 1번이 ID 조회 20번으로 바뀌어 QPS 가 20배 된다. 캐시 없이는 Step 4 가 DB 를 더 괴롭힌다.</li><li><b>MGET 을 쓰는 이유</b> 20번 왕복을 1번으로. Redis 왕복 0.3ms × 20 = 6ms 가 0.5ms 로 준다. 파이프라이닝과 같은 효과.</li><li><b>해시 vs 직렬화 문자열</b> 게시물 전체를 JSON 문자열 하나로 두면 MGET 한 번으로 끝난다. 필드 단위 갱신이 필요하면 해시. 게시물은 불변에 가까워 문자열로 시작한다.</li><li><b>대안 · 앱 로컬 캐시 (Caffeine)</b> 인기 글 상위 1% 는 모든 인스턴스가 같은 걸 읽으므로 Redis 앞에 로컬 캐시를 얹으면 효과가 크다. 다만 인스턴스마다 무효화가 안 되니 TTL 을 짧게 (10초) 둔다. Redis 다음에 추가한다.</li></ul>
+  </div>
+  <p class="codeline"><strong>코드에서 바뀌는 것</strong><code>PostCache</code> 구현 <code>RedisPostCache</code>. <code>GetHomeFeed</code> 의 hydrate 단계가 <code>PostCache.getAll(ids)</code> 를 거친다.</p>
+</section>
+
+<section class="step" id="step-6">
+  <div class="step-head">
+    <span class="num">Step 6</span>
+    <h2>배달을 게시 요청에서 뗀다</h2>
+    <span class="tag">도입 · Kafka + fan-out 워커</span>
+  </div>
+  <p class="signal"><strong>넘어가는 신호</strong>게시 API p99 가 팔로워 수에 비례해 수백 ms 를 넘고, 팔로워 1만 명 계정의 게시가 수 초 걸릴 때. Redis 장애가 게시 실패로 번질 때.</p>
+  <figure>
+    <div class="fig-scroll"><svg viewBox="0 0 780 220" role="img" aria-label="게시 API 는 DB 에 넣고 이벤트만 발행한 뒤 즉시 응답하고, 워커가 팔로워 피드에 밀어 넣는다" style="max-width:780px;min-width:520px" xmlns="http://www.w3.org/2000/svg"><rect class="box" x="20" y="74" width="130" height="52" rx="6"/><text class="lbl" x="85.0" y="104.0" text-anchor="middle">작성자</text><line class="edge" x1="200" y1="90" x2="150" y2="90" marker-end="url(#arr)"/><text class="el" x="175" y="80" text-anchor="middle">201 즉시</text><line class="edge" x1="150" y1="110" x2="200" y2="110" marker-end="url(#arr)"/><rect class="box" x="200" y="74" width="130" height="52" rx="6"/><text class="lbl" x="265.0" y="104.0" text-anchor="middle">게시 API</text><line class="edge" x1="330" y1="90" x2="420" y2="40" marker-end="url(#arr)"/><text class="el" x="375.0" y="58.0" text-anchor="middle">posts INSERT</text><rect class="box" x="420" y="14" width="120" height="52" rx="6"/><text class="lbl" x="480.0" y="44.0" text-anchor="middle">PostgreSQL</text><line class="edge new dash" x1="330" y1="110" x2="420" y2="160" marker-end="url(#arrn)"/><text class="el new" x="375" y="150" text-anchor="middle">post-created 이벤트</text><rect class="box new" x="420" y="134" width="130" height="52" rx="6"/><text class="lbl" x="485.0" y="157.0" text-anchor="middle">Kafka</text><text class="sub" x="485.0" y="173.0" text-anchor="middle">topic: post-created</text><line class="edge new" x1="550" y1="160" x2="620" y2="160" marker-end="url(#arrn)"/><rect class="box new" x="620" y="134" width="140" height="52" rx="6"/><text class="lbl" x="690.0" y="157.0" text-anchor="middle">fan-out 워커</text><text class="sub" x="690.0" y="173.0" text-anchor="middle">팔로워 조회 → LPUSH</text><line class="edge new" x1="690" y1="134" x2="690" y2="66" marker-end="url(#arrn)"/><text class="el new" x="700" y="100" text-anchor="start">팔로워 N명 피드에 쓰기</text><rect class="box" x="620" y="14" width="140" height="52" rx="6"/><text class="lbl" x="690.0" y="44.0" text-anchor="middle">Redis 피드</text></svg></div>
+    <figcaption>게시 API 는 DB 에 넣고 이벤트만 발행한 뒤 즉시 응답하고, 워커가 팔로워 피드에 밀어 넣는다.</figcaption>
+  </figure>
+  <div class="cols">
+    <div><h3>얻는 것</h3><ul><li>게시 응답이 팔로워 수와 무관해진다. INSERT + produce 로 10ms 안쪽.</li><li>워커를 따로 스케일한다. 피크에 밀린 이벤트는 큐에 쌓였다가 처리된다.</li><li>Redis 장애 시 게시는 성공하고 배달만 지연된다. 재처리가 된다.</li></ul></div>
+    <div><h3>대가</h3><ul><li>피드 반영이 수백 ms ~ 수 초 늦는다. 최종 일관성을 요구사항으로 받아들인 이유다.</li><li>워커가 두 번 처리하면 피드에 같은 글이 두 번 들어간다. 멱등 처리 (리스트 삽입 전 존재 확인 또는 ZSET).</li></ul></div>
+  </div>
+  <div class="why">
+    <h3>왜 이 기술인가</h3>
+    <ul><li><b>비동기로 가는 이유</b> 동기 fan-out 은 게시 요청의 지연을 팔로워 수가 결정하게 한다. 사용자는 자기 글이 즉시 올라가길 원하지, 200명에게 배달이 끝나길 기다리지 않는다. 최종 일관성을 받아들이면 배달은 뒤에서 해도 된다.</li><li><b>Kafka 를 고른 이유</b> 하루 200만 게시 이벤트는 사실 작아서 어떤 큐든 된다. Kafka 를 고른 건 같은 이벤트를 Step 9 (상호작용 로그), Step 10 (좋아요 원장), 알림, 검색 색인이 각자 구독하기 때문이다. 토픽 하나에 컨슈머 그룹 여럿이 붙는 모델이 여기 맞는다.</li><li><b>대안 · SQS / RabbitMQ</b> fan-out 하나만 보면 더 단순하고 운영이 쉽다. 구독자가 하나뿐이고 재처리가 필요 없다면 이쪽. 구독자가 둘이 되는 순간 토픽 복제가 필요해진다.</li><li><b>대안 · DB 아웃박스 폴링</b> 큐 없이 posts 테이블을 워커가 폴링. 인프라 추가가 없지만 지연과 DB 부하가 폴링 주기에 묶인다. 가장 작은 규모에서만.</li><li><b>멱등성</b> at-least-once 라 같은 이벤트가 두 번 올 수 있다. 피드 삽입 전 <code>post_id</code> 존재 확인, 또는 ZSET 으로 전환.</li></ul>
+  </div>
+  <p class="codeline"><strong>코드에서 바뀌는 것</strong><code>FanoutPublisher</code> 구현을 <code>KafkaFanoutPublisher</code> 로. 워커는 같은 코드베이스의 별도 프로필.</p>
+</section>
+
+<section class="step" id="step-7">
+  <div class="step-head">
+    <span class="num">Step 7</span>
+    <h2>팔로워 100만 명 문제</h2>
+    <span class="tag">도입 · 하이브리드 (셀럽은 pull)</span>
+  </div>
+  <p class="signal"><strong>넘어가는 신호</strong>팔로워 100만 계정 하나가 글을 쓰면 fan-out 쓰기 100만 건, 워커가 수 분 밀리고 Redis 쓰기가 폭주할 때. 상위 0.1% 계정이 fan-out 트래픽의 대부분을 만든다.</p>
+  <figure>
+    <div class="fig-scroll"><svg viewBox="0 0 780 240" role="img" aria-label="일반 사용자 글은 미리 밀어 넣은 피드에서, 팔로워가 많은 계정 글은 조회 시점에 끌어와 합친다" style="max-width:780px;min-width:520px" xmlns="http://www.w3.org/2000/svg"><rect class="box" x="20" y="94" width="130" height="52" rx="6"/><text class="lbl" x="85.0" y="124.0" text-anchor="middle">피드 API</text><line class="edge" x1="150" y1="105" x2="260" y2="50" marker-end="url(#arr)"/><text class="el" x="205" y="62" text-anchor="middle">① push 피드 (일반 사용자 글)</text><rect class="box" x="260" y="24" width="200" height="52" rx="6"/><text class="lbl" x="360.0" y="54.0" text-anchor="middle">Redis 피드 리스트</text><line class="edge new" x1="150" y1="125" x2="260" y2="190" marker-end="url(#arrn)"/><text class="el new" x="205" y="182" text-anchor="middle">② 팔로우한 셀럽 최신 글 pull</text><rect class="box new" x="260" y="164" width="200" height="52" rx="6"/><text class="lbl" x="360.0" y="187.0" text-anchor="middle">셀럽 게시물 캐시</text><text class="sub" x="360.0" y="203.0" text-anchor="middle">author:{celebId} 최근 글</text><line class="edge new" x1="460" y1="50" x2="520" y2="100" marker-end="url(#arrn)"/><line class="edge new" x1="460" y1="190" x2="520" y2="140" marker-end="url(#arrn)"/><rect class="box new" x="520" y="94" width="130" height="52" rx="6"/><text class="lbl" x="585.0" y="117.0" text-anchor="middle">③ 시간순 머지</text><text class="sub" x="585.0" y="133.0" text-anchor="middle">상위 20개</text><line class="edge" x1="650" y1="120" x2="700" y2="120" marker-end="url(#arr)"/><rect class="box" x="700" y="94" width="60" height="52" rx="6"/><text class="lbl" x="730.0" y="124.0" text-anchor="middle">응답</text></svg></div>
+    <figcaption>일반 사용자 글은 미리 밀어 넣은 피드에서, 팔로워가 많은 계정 글은 조회 시점에 끌어와 합친다.</figcaption>
+  </figure>
+  <div class="cols">
+    <div><h3>얻는 것</h3><ul><li>팔로워 임계값 (예: 10만) 이상 계정은 fan-out 을 건너뛴다. 쓰기 폭증이 사라진다.</li><li>셀럽은 수가 적고 글도 적어 그들의 최근 글은 작은 캐시 하나에 다 들어간다. pull 비용이 상수에 가깝다.</li></ul></div>
+    <div><h3>대가</h3><ul><li>피드 조회가 두 소스를 머지한다. 코드가 복잡해지고 지연이 수 ms 는다.</li><li>임계값 근처에서 계정이 모드를 오가면 피드에 빈 구간이 생긴다. 전환 시 한 번 백필한다.</li></ul></div>
+  </div>
+  <div class="why">
+    <h3>왜 이 기술인가</h3>
+    <ul><li><b>하이브리드를 고른 이유</b> 팔로워 분포는 극단적으로 치우쳐 있다. 상위 0.1% 계정이 전체 fan-out 쓰기의 대부분을 만든다. 그 계정만 push 에서 빼면 쓰기 폭증의 대부분이 사라지고, 나머지 99.9% 는 push 의 빠른 읽기를 그대로 누린다.</li><li><b>대안 · 전부 pull 로 회귀</b> Step 0 의 문제로 돌아간다.</li><li><b>대안 · 셀럽 글도 push 하되 워커를 늘린다</b> 100만 쓰기를 더 빨리 할 뿐 비용은 그대로다. 글 하나에 100만 × 8B = 8MB 의 Redis 쓰기, 하루 수백 개 셀럽 글이면 수 GB. 그리고 팔로워 1천만이면 10배다.</li><li><b>임계값</b> 10만은 출발점이다. 'fan-out 1건당 비용 × 팔로워 수' 가 '조회 1건당 pull 비용 × 그 계정 팔로워의 일일 피드 조회 수' 를 넘는 지점이 이론값이다. 측정해서 조정한다.</li><li><b>셀럽 글 캐시</b> 셀럽은 수천 명, 각자 최근 글 50개면 수십만 ID 로 Redis 에 다 들어간다. pull 이라 해도 DB 를 보지 않는다.</li></ul>
+  </div>
+  <p class="codeline"><strong>코드에서 바뀌는 것</strong><code>GetHomeFeed</code> 가 <code>FeedSource</code> 두 개 (<code>RedisFeedSource</code>, <code>CelebrityPullSource</code>) 를 머지. <code>PublishPost</code> 가 팔로워 수로 fan-out 여부를 결정.</p>
+</section>
+<p class="phase">Stage 3 · 저장·랭킹·글로벌</p>
+<section class="step" id="step-8">
+  <div class="step-head">
+    <span class="num">Step 8</span>
+    <h2>수십억 행을 나눈다</h2>
+    <span class="tag">도입 · DB 샤딩 (posts · follows)</span>
+  </div>
+  <p class="signal"><strong>넘어가는 신호</strong>posts 수십억 행, follows 수백억 행. 인덱스가 메모리에 안 들어가고 VACUUM 이 하루를 넘길 때.</p>
+  <figure>
+    <div class="fig-scroll"><svg viewBox="0 0 760 240" role="img" aria-label="게시물은 ID 해시로, 팔로우 관계는 양방향 테이블로 나눠 각 조회가 샤드 하나만 보게 한다" style="max-width:760px;min-width:520px" xmlns="http://www.w3.org/2000/svg"><rect class="box" x="20" y="84" width="130" height="52" rx="6"/><text class="lbl" x="85.0" y="114.0" text-anchor="middle">App</text><line class="edge" x1="150" y1="110" x2="200" y2="110" marker-end="url(#arr)"/><rect class="box new" x="200" y="84" width="200" height="52" rx="6"/><text class="lbl" x="300.0" y="107.0" text-anchor="middle">샤드 라우터</text><text class="sub" x="300.0" y="123.0" text-anchor="middle">posts: post_id · follows: 양방향</text><line class="edge new" x1="400" y1="110" x2="480" y2="40" marker-end="url(#arrn)"/><line class="edge new" x1="400" y1="110" x2="480" y2="110" marker-end="url(#arrn)"/><text class="el new" x="440.0" y="103.0" text-anchor="middle">단일 샤드 조회</text><line class="edge new" x1="400" y1="110" x2="480" y2="180" marker-end="url(#arrn)"/><rect class="box new" x="480" y="14" width="130" height="52" rx="6"/><text class="lbl" x="545.0" y="37.0" text-anchor="middle">Shard 0</text><text class="sub" x="545.0" y="53.0" text-anchor="middle">primary + replica</text><rect class="box new" x="480" y="84" width="130" height="52" rx="6"/><text class="lbl" x="545.0" y="107.0" text-anchor="middle">Shard 1</text><text class="sub" x="545.0" y="123.0" text-anchor="middle">primary + replica</text><rect class="box new" x="480" y="154" width="130" height="52" rx="6"/><text class="lbl" x="545.0" y="177.0" text-anchor="middle">Shard 2</text><text class="sub" x="545.0" y="193.0" text-anchor="middle">primary + replica</text></svg></div>
+    <figcaption>게시물은 ID 해시로, 팔로우 관계는 양방향 테이블로 나눠 각 조회가 샤드 하나만 보게 한다.</figcaption>
+  </figure>
+  <div class="cols">
+    <div><h3>얻는 것</h3><ul><li>posts 는 <code>post_id</code> 해시. hydrate 는 항상 ID 로 조회하므로 단일 샤드.</li><li>follows 는 접근 패턴이 둘이다. fan-out 은 '이 사람의 팔로워', 조회는 '내가 팔로우하는 사람'. <code>follows_by_followee</code>, <code>follows_by_follower</code> 두 테이블에 이중 기록하고 각각 해당 키로 샤딩한다.</li></ul></div>
+    <div><h3>대가</h3><ul><li>이중 기록은 두 샤드에 걸친 쓰기다. 트랜잭션 대신 이벤트로 보정 (최종 일관성).</li><li>작성자별 글 목록 (프로필 페이지) 은 post_id 샤딩에서 scatter 다. <code>author_id → post_ids</code> 인덱스 테이블을 따로 둔다.</li><li>처음부터 가상 샤드 1024개를 물리 노드에 매핑한다.</li></ul></div>
+  </div>
+  <div class="why">
+    <h3>왜 이 기술인가</h3>
+    <ul><li><b>샤딩 키를 두 개로 나누는 이유</b> posts 와 follows 의 접근 패턴이 다르다. posts 는 ID 로만 조회 (hydrate) 하므로 <code>post_id</code> 해시. follows 는 '누구의 팔로워' 와 '누가 팔로우' 두 방향이라 한 키로는 한쪽이 scatter 다. 이중 기록으로 두 방향 모두 단일 샤드로 만든다. 저장은 2배지만 행이 작다.</li><li><b>대안 · Cassandra 로 이관</b> 와이드 컬럼이 타임라인·팔로우 목록에 자연스럽고 샤딩을 DB 가 한다. 운영 인력이 있으면 유력하다. PostgreSQL 유지의 이유는 트랜잭션과 기존 쿼리 보존이다.</li><li><b>대안 · Citus / Vitess</b> 투명하지만 이중 기록 같은 패턴 분리는 어차피 애플리케이션 결정이다.</li><li><b>해시 vs 범위</b> post_id 는 시간순이라 범위 샤딩하면 최신 샤드에 쓰기가 몰린다. 해시다.</li></ul>
+  </div>
+  <p class="codeline"><strong>코드에서 바뀌는 것</strong><code>PostRepository</code>, <code>FollowRepository</code> 구현을 샤드 라우팅 버전으로. 포트 시그니처는 그대로.</p>
+</section>
+
+<section class="step" id="step-9">
+  <div class="step-head">
+    <span class="num">Step 9</span>
+    <h2>시간순에서 점수순으로</h2>
+    <span class="tag">도입 · 랭킹 (피처 저장소 + 배치)</span>
+  </div>
+  <p class="signal"><strong>넘어가는 신호</strong>제품 지표. 팔로우가 늘어 시간순 피드에서 사용자가 원하는 글을 놓치고, 체류 시간이 정체될 때. 기술 병목이 아니라 제품 결정이다.</p>
+  <figure>
+    <div class="fig-scroll"><svg viewBox="0 0 780 220" role="img" aria-label="시간순 대신 후보 수백 개에 점수를 매겨 상위 20개를 고른다. 점수 재료는 배치가 만들어 피처 저장소에 둔다" style="max-width:780px;min-width:520px" xmlns="http://www.w3.org/2000/svg"><rect class="box" x="20" y="74" width="130" height="52" rx="6"/><text class="lbl" x="85.0" y="104.0" text-anchor="middle">피드 API</text><line class="edge" x1="150" y1="100" x2="220" y2="100" marker-end="url(#arr)"/><rect class="box" x="220" y="74" width="140" height="52" rx="6"/><text class="lbl" x="290.0" y="97.0" text-anchor="middle">후보 수집</text><text class="sub" x="290.0" y="113.0" text-anchor="middle">push + pull 500개</text><line class="edge new" x1="360" y1="100" x2="440" y2="100" marker-end="url(#arrn)"/><text class="el new" x="400.0" y="93.0" text-anchor="middle">후보 + 피처</text><rect class="box new" x="440" y="74" width="200" height="52" rx="6"/><text class="lbl" x="540.0" y="97.0" text-anchor="middle">랭커</text><text class="sub" x="540.0" y="113.0" text-anchor="middle">score = f(최신성, 친밀도, 반응)</text><line class="edge" x1="640" y1="100" x2="700" y2="100" marker-end="url(#arr)"/><text class="el" x="670.0" y="93.0" text-anchor="middle">상위 20</text><rect class="box" x="700" y="74" width="60" height="52" rx="6"/><text class="lbl" x="730.0" y="104.0" text-anchor="middle">응답</text><line class="edge new" x1="540" y1="170" x2="540" y2="126" marker-end="url(#arrn)"/><text class="el new" x="550" y="152" text-anchor="start">조회</text><rect class="box new" x="440" y="154" width="200" height="52" rx="6"/><text class="lbl" x="540.0" y="177.0" text-anchor="middle">피처 저장소</text><text class="sub" x="540.0" y="193.0" text-anchor="middle">Redis · 친밀도 · 반응 수</text><line class="edge new dash" x1="360" y1="180" x2="440" y2="180" marker-end="url(#arrn)"/><text class="el new" x="400.0" y="173.0" text-anchor="middle">일배치 적재</text><rect class="box new" x="220" y="154" width="140" height="52" rx="6"/><text class="lbl" x="290.0" y="177.0" text-anchor="middle">배치 (Spark)</text><text class="sub" x="290.0" y="193.0" text-anchor="middle">상호작용 로그 → 친밀도</text></svg></div>
+    <figcaption>시간순 대신 후보 수백 개에 점수를 매겨 상위 20개를 고른다. 점수 재료는 배치가 만들어 피처 저장소에 둔다.</figcaption>
+  </figure>
+  <div class="cols">
+    <div><h3>얻는 것</h3><ul><li>처음엔 가중합 하나다. <code>score = 최신성 × w1 + 친밀도 × w2 + 반응 수 × w3</code>. 모델은 나중이다.</li><li>친밀도 (내가 누구 글에 반응했나) 는 일배치로 계산해 Redis 에 둔다. 온라인 경로는 조회와 곱셈만.</li></ul></div>
+    <div><h3>대가</h3><ul><li>후보를 20개가 아니라 500개 가져와야 한다. Redis 피드 길이와 MGET 크기가 는다.</li><li>랭킹 서비스가 A/B 테스트와 지표 파이프라인을 요구한다. 작은 팀이면 미룬다.</li></ul></div>
+  </div>
+  <div class="why">
+    <h3>왜 이 기술인가</h3>
+    <ul><li><b>가중합으로 시작하는 이유</b> 랭킹의 효과 대부분은 '친밀도 높은 사람 글을 위로' 에서 나온다. 식 하나와 피처 셋으로 그걸 얻고, 모델은 A/B 인프라가 생긴 뒤다.</li><li><b>피처를 배치로 만드는 이유</b> 친밀도는 수개월 상호작용의 집계다. 요청마다 계산할 수 없고 매일 조금 바뀐다. Spark 일배치 → Redis 적재가 가장 단순하다. Flink 실시간은 '방금 반응한 사람' 가중치가 필요해질 때.</li><li><b>대안 · 랭킹을 DB 쿼리로</b> <code>ORDER BY score</code> 는 후보 전체를 읽어야 한다. 후보를 500개로 제한한 뒤 앱에서 정렬하는 쪽이 싸다.</li><li><b>왜 Step 9 인가</b> 기술 병목이 아니라 제품 요구라 순서가 유연하다. fan-out·캐시가 안정된 뒤에 넣어야 랭킹 효과를 지연 변화와 분리해 측정할 수 있다.</li></ul>
+  </div>
+  <p class="codeline"><strong>코드에서 바뀌는 것</strong><code>RankingPolicy</code> 포트 추가. 구현 <code>ChronologicalRanking</code> → <code>WeightedRanking</code>.</p>
+</section>
+
+<section class="step" id="step-10">
+  <div class="step-head">
+    <span class="num">Step 10</span>
+    <h2>좋아요 수를 DB 에서 뗀다</h2>
+    <span class="tag">도입 · Redis 카운터 + 이벤트 원장</span>
+  </div>
+  <p class="signal"><strong>넘어가는 신호</strong>좋아요 쓰기가 게시 쓰기의 50배. <code>UPDATE posts SET like_count = like_count + 1</code> 이 인기 글 행에서 락 경합을 일으킬 때.</p>
+  <figure>
+    <div class="fig-scroll"><svg viewBox="0 0 760 220" role="img" aria-label="좋아요 수는 Redis 카운터가 즉시 올리고, 원장 기록은 이벤트로 흘려 배치로 DB 에 쌓는다" style="max-width:760px;min-width:520px" xmlns="http://www.w3.org/2000/svg"><rect class="box" x="20" y="74" width="130" height="52" rx="6"/><text class="lbl" x="85.0" y="104.0" text-anchor="middle">Client</text><line class="edge" x1="150" y1="100" x2="200" y2="100" marker-end="url(#arr)"/><text class="el" x="175.0" y="93.0" text-anchor="middle">POST /like</text><rect class="box" x="200" y="74" width="130" height="52" rx="6"/><text class="lbl" x="265.0" y="104.0" text-anchor="middle">좋아요 API</text><line class="edge new" x1="330" y1="90" x2="420" y2="40" marker-end="url(#arrn)"/><text class="el new" x="375" y="55" text-anchor="middle">INCR likes:{post}</text><rect class="box new" x="420" y="14" width="130" height="52" rx="6"/><text class="lbl" x="485.0" y="37.0" text-anchor="middle">Redis 카운터</text><text class="sub" x="485.0" y="53.0" text-anchor="middle">표시용 · 즉시</text><line class="edge new dash" x1="330" y1="110" x2="420" y2="160" marker-end="url(#arrn)"/><text class="el new" x="375" y="150" text-anchor="middle">like 이벤트</text><rect class="box new" x="420" y="134" width="130" height="52" rx="6"/><text class="lbl" x="485.0" y="164.0" text-anchor="middle">Kafka</text><line class="edge" x1="550" y1="160" x2="620" y2="160" marker-end="url(#arr)"/><text class="el" x="585.0" y="153.0" text-anchor="middle">배치 UPSERT</text><rect class="box" x="620" y="134" width="120" height="52" rx="6"/><text class="lbl" x="680.0" y="157.0" text-anchor="middle">PostgreSQL</text><text class="sub" x="680.0" y="173.0" text-anchor="middle">likes 원장</text></svg></div>
+    <figcaption>좋아요 수는 Redis 카운터가 즉시 올리고, 원장 기록은 이벤트로 흘려 배치로 DB 에 쌓는다.</figcaption>
+  </figure>
+  <div class="cols">
+    <div><h3>얻는 것</h3><ul><li><code>INCR</code> 은 원자적이고 1µs 다. 핫 행 락이 사라진다.</li><li>hydrate 때 카운터를 <code>MGET</code> 으로 함께 읽는다. 게시물 캐시 무효화와 분리된다.</li></ul></div>
+    <div><h3>대가</h3><ul><li>Redis 가 데이터를 잃으면 카운터가 어긋난다. 원장에서 재계산할 수 있어야 한다.</li><li>중복 좋아요 방지는 <code>SET liked:{post}</code> 또는 DB 유니크 제약. 둘 다 두면 비용이 2배.</li></ul></div>
+  </div>
+  <div class="why">
+    <h3>왜 이 기술인가</h3>
+    <ul><li><b>Redis 카운터를 고른 이유</b> 좋아요는 쓰기 중 가장 잦고, 인기 글 하나에 몰린다. DB 행 UPDATE 는 같은 행에 락이 직렬화되어 초당 수백 건이 한계다. <code>INCR</code> 은 단일 스레드 Redis 에서도 초당 수십만 건이다.</li><li><b>원장을 따로 두는 이유</b> 카운터는 표시용이고 정합성의 원천이 아니다. '누가 좋아했나' 는 DB 에 있어야 취소·중복 방지·재계산이 된다. Kafka 로 흘려 배치 UPSERT 하면 DB 쓰기가 묶여서 들어간다.</li><li><b>대안 · DB 에 like 행 INSERT 만 하고 count 는 COUNT(*)</b> 인기 글에서 COUNT 가 수백만 행이다. 캐시해도 무효화가 초당 수백 번.</li><li><b>대안 · CRDT 카운터</b> 멀티 리전 (Step 12) 에서 리전별 카운터를 합칠 때 필요해진다. 그 전까지는 과하다.</li></ul>
+  </div>
+  <p class="codeline"><strong>코드에서 바뀌는 것</strong><code>CounterStore</code> 포트 추가. <code>LikePost</code> 가 <code>INCR</code> + 이벤트 발행.</p>
+</section>
+
+<section class="step" id="step-11">
+  <div class="step-head">
+    <span class="num">Step 11</span>
+    <h2>이 시스템의 유일한 CPU 바운드 구간</h2>
+    <span class="tag">도입 · 미디어 처리 워커 (libvips)</span>
+  </div>
+  <p class="signal"><strong>넘어가는 신호</strong>모바일에서 원본 3MB 이미지를 그대로 내려받아 피드 스크롤이 느리고 데이터가 샐 때. 앱 서버에서 리사이즈를 시도하면 CPU 가 I/O 요청 처리를 막는다.</p>
+  <figure>
+    <div class="fig-scroll"><svg viewBox="0 0 780 200" role="img" aria-label="원본이 올라오면 이벤트로 워커를 깨워 여러 해상도로 변환해 두고, 앱 서버는 이 CPU 작업을 하지 않는다" style="max-width:780px;min-width:520px" xmlns="http://www.w3.org/2000/svg"><rect class="box" x="20" y="74" width="130" height="52" rx="6"/><text class="lbl" x="85.0" y="104.0" text-anchor="middle">Client</text><line class="edge" x1="150" y1="100" x2="200" y2="100" marker-end="url(#arr)"/><text class="el" x="175.0" y="93.0" text-anchor="middle">원본 업로드</text><rect class="box" x="200" y="74" width="130" height="52" rx="6"/><text class="lbl" x="265.0" y="104.0" text-anchor="middle">S3 원본</text><line class="edge dash" x1="330" y1="100" x2="400" y2="100" marker-end="url(#arr)"/><text class="el" x="365.0" y="93.0" text-anchor="middle">ObjectCreated</text><rect class="box" x="400" y="74" width="110" height="52" rx="6"/><text class="lbl" x="455.0" y="97.0" text-anchor="middle">이벤트 큐</text><text class="sub" x="455.0" y="113.0" text-anchor="middle">SQS / Kafka</text><line class="edge new" x1="510" y1="100" x2="560" y2="40" marker-end="url(#arrn)"/><rect class="box new" x="560" y="14" width="160" height="52" rx="6"/><text class="lbl" x="640.0" y="37.0" text-anchor="middle">미디어 워커</text><text class="sub" x="640.0" y="53.0" text-anchor="middle">libvips · CPU 바운드</text><line class="edge new" x1="640" y1="66" x2="640" y2="134" marker-end="url(#arrn)"/><text class="el new" x="650" y="100" text-anchor="start">4종 해상도 저장</text><rect class="box new" x="560" y="134" width="160" height="52" rx="6"/><text class="lbl" x="640.0" y="164.0" text-anchor="middle">S3 파생본 → CDN</text></svg></div>
+    <figcaption>원본이 올라오면 이벤트로 워커를 깨워 여러 해상도로 변환해 두고, 앱 서버는 이 CPU 작업을 하지 않는다.</figcaption>
+  </figure>
+  <div class="cols">
+    <div><h3>얻는 것</h3><ul><li>이미지 디코딩·리사이즈·인코딩은 장당 50~300ms CPU 를 쓴다. 이걸 I/O 바운드 앱 서버에서 분리해야 피드 API p99 가 안 흔들린다.</li><li>워커는 CPU 코어 수만큼만 병렬로 돌린다. 가상 스레드가 아니라 고정 풀이다.</li><li>썸네일·중간·원본 등 4종을 미리 만들어 CDN 에 둔다.</li></ul></div>
+    <div><h3>대가</h3><ul><li>파생본이 준비되기 전 수 초 동안은 원본 또는 플레이스홀더를 보여 준다.</li><li>저장 용량이 1.5배.</li></ul></div>
+  </div>
+  <div class="why">
+    <h3>왜 이 기술인가</h3>
+    <ul><li><b>워커로 분리하는 이유</b> 이 로드맵에서 유일한 CPU 바운드 작업이다. 이미지 1장 리사이즈는 50~300ms 동안 코어 하나를 꽉 쓴다. I/O 바운드 앱 서버에서 돌리면 그 시간 동안 그 코어가 처리할 수천 건의 피드 요청이 밀린다. 가상 스레드도 도움이 안 된다. CPU 가 바쁜 거지 기다리는 게 아니다.</li><li><b>libvips 를 고른 이유</b> ImageMagick 대비 4~8배 빠르고 메모리 1/10 이다. 스트리밍 처리라 큰 이미지도 메모리에 다 올리지 않는다. imgproxy, Thumbor 같은 기성 서비스가 libvips 위에 있다.</li><li><b>대안 · JVM 에서 ImageIO / Thumbnailator</b> 가능하지만 느리고 (libvips 의 1/5), 포맷 지원 (HEIC, AVIF) 이 약하다. 여기서는 언어를 바꾸는 게 맞다. 워커는 Go 로 짠 imgproxy 를 그대로 쓰거나, JVM 에서 libvips 바인딩을 쓴다.</li><li><b>대안 · 요청 시 변환 (on-the-fly) + CDN 캐시</b> 첫 요청만 변환하고 CDN 이 캐시. 저장이 줄고 해상도 추가가 쉽다. 첫 조회 지연이 수백 ms 라 피드 첫 화면에는 불리하다. 썸네일은 미리, 나머지는 on-the-fly 로 섞는 게 보통이다.</li><li><b>왜 이벤트 기반인가</b> 업로드 완료를 앱이 알 필요가 없다. 저장소의 ObjectCreated 이벤트가 큐로 가고 워커가 꺼낸다. 앱 서버와 워커가 완전히 분리된다.</li></ul>
+  </div>
+  <p class="codeline"><strong>코드에서 바뀌는 것</strong>앱 코드 변경 없음. 워커는 별도 서비스. <code>MediaStore</code> 가 파생본 URL 규칙만 안다.</p>
+</section>
+
+<section class="step" id="step-12">
+  <div class="step-head">
+    <span class="num">Step 12</span>
+    <h2>지리적 확장과 남용 방어</h2>
+    <span class="tag">도입 · GeoDNS + 멀티 리전 + API Gateway</span>
+  </div>
+  <p class="signal"><strong>넘어가는 신호</strong>해외 사용자 피드 지연 300ms 이상, 리전 장애 시 전면 중단. 봇 계정의 게시·팔로우 폭주.</p>
+  <figure>
+    <div class="fig-scroll"><svg viewBox="0 0 780 300" role="img" aria-label="GeoDNS 가 가까운 리전으로 보내고, 게시물 DB 는 리전 간 비동기 복제하되 피드 리스트는 각 리전에서 다시 만든다" style="max-width:780px;min-width:520px" xmlns="http://www.w3.org/2000/svg"><rect class="box new" x="325" y="14" width="130" height="52" rx="6"/><text class="lbl" x="390.0" y="37.0" text-anchor="middle">GeoDNS</text><text class="sub" x="390.0" y="53.0" text-anchor="middle">Route 53</text><line class="edge new" x1="390" y1="66" x2="200" y2="110" marker-end="url(#arrn)"/><text class="el new" x="270" y="85" text-anchor="middle">KR 사용자</text><line class="edge new" x1="390" y1="66" x2="580" y2="110" marker-end="url(#arrn)"/><text class="el new" x="510" y="85" text-anchor="middle">US 사용자</text><rect class="grp" x="20" y="110" width="360" height="170" rx="10"/><text class="sub" x="32" y="128">Region A · ap-northeast-2</text><rect class="box" x="35" y="150" width="90" height="44" rx="6"/><text class="lbl" x="80.0" y="176.0" text-anchor="middle">Gateway</text><line class="edge" x1="125" y1="172" x2="140" y2="172" marker-end="url(#arr)"/><rect class="box" x="140" y="150" width="100" height="44" rx="6"/><text class="lbl" x="190.0" y="176.0" text-anchor="middle">services</text><line class="edge" x1="240" y1="165" x2="255" y2="165" marker-end="url(#arr)"/><rect class="box" x="255" y="150" width="110" height="44" rx="6"/><text class="lbl" x="310.0" y="176.0" text-anchor="middle">Redis 피드</text><line class="edge" x1="240" y1="180" x2="255" y2="230" marker-end="url(#arr)"/><rect class="box" x="255" y="215" width="110" height="44" rx="6"/><text class="lbl" x="310.0" y="241.0" text-anchor="middle">DB 샤드</text><rect class="grp" x="400" y="110" width="360" height="170" rx="10"/><text class="sub" x="412" y="128">Region B · us-east-1</text><rect class="box" x="415" y="150" width="90" height="44" rx="6"/><text class="lbl" x="460.0" y="176.0" text-anchor="middle">Gateway</text><line class="edge" x1="505" y1="172" x2="520" y2="172" marker-end="url(#arr)"/><rect class="box" x="520" y="150" width="100" height="44" rx="6"/><text class="lbl" x="570.0" y="176.0" text-anchor="middle">services</text><line class="edge" x1="620" y1="165" x2="635" y2="165" marker-end="url(#arr)"/><rect class="box" x="635" y="150" width="110" height="44" rx="6"/><text class="lbl" x="690.0" y="176.0" text-anchor="middle">Redis 피드</text><line class="edge" x1="620" y1="180" x2="635" y2="230" marker-end="url(#arr)"/><rect class="box" x="635" y="215" width="110" height="44" rx="6"/><text class="lbl" x="690.0" y="241.0" text-anchor="middle">DB 샤드</text><line class="edge new dash" x1="365" y1="237" x2="635" y2="237" marker-end="url(#arrn)" marker-start="url(#arrn)"/><text class="el new" x="500" y="258" text-anchor="middle">양방향 비동기 복제 · 피드는 리전 로컬</text></svg></div>
+    <figcaption>GeoDNS 가 가까운 리전으로 보내고, 게시물 DB 는 리전 간 비동기 복제하되 피드 리스트는 각 리전에서 다시 만든다.</figcaption>
+  </figure>
+  <div class="cols">
+    <div><h3>얻는 것</h3><ul><li>피드 조회가 사용자 근처 리전에서 끝난다. 피드 리스트는 리전 로컬 Redis 에 두고 fan-out 워커가 리전마다 돈다.</li><li>게이트웨이에서 토큰 버킷 rate limit, 봇 탐지, 인증을 한곳에 모은다.</li></ul></div>
+    <div><h3>대가</h3><ul><li>게시물은 리전 간 복제 지연 (수백 ms) 뒤에 다른 리전 피드에 나타난다.</li><li>fan-out 이 리전 수만큼 중복된다. 리전 2개면 Redis 쓰기 2배.</li></ul></div>
+  </div>
+  <div class="why">
+    <h3>왜 이 기술인가</h3>
+    <ul><li><b>피드 리스트를 리전 로컬로 두는 이유</b> 피드는 재구성 가능한 파생 데이터다. 리전 간 복제할 가치가 없고, 게시물 이벤트만 미러링하면 각 리전 워커가 자기 Redis 에 다시 만든다. 원천 데이터 (posts, follows) 만 복제한다.</li><li><b>GeoDNS vs Anycast</b> URL 단축기와 같다. DNS 라우팅으로 시작, failover 속도가 문제되면 Anycast.</li><li><b>API Gateway 를 여기서 넣는 이유</b> 봇의 팔로우·게시 폭주는 fan-out 비용을 직접 올린다. 가짜 계정 1개가 10만 명을 팔로우하면 그 10만 명의 글이 전부 그 계정 피드로 fan-out 된다. 게이트웨이 rate limit 과 계정 단위 한도를 fan-out 앞에 둔다.</li><li><b>대안 · 단일 리전 + 글로벌 CDN</b> 이미지는 CDN 이 이미 가깝다. 피드 API 지연 300ms 가 허용되면 멀티 리전은 미룬다. 리전 장애 허용 여부가 결정한다.</li></ul>
+  </div>
+  <p class="codeline"><strong>코드에서 바뀌는 것</strong>코드 변경 없음. 리전별 Kafka 미러링과 워커 배치.</p>
+</section>
+<section class="summary">
+  <h2>한눈에 보기</h2>
+  <div class="tbl-scroll"><table>
+    <thead><tr><th>Step</th><th>도입 기술</th><th>넘어가는 신호</th><th>선택 이유</th><th>코드에서 바뀌는 것</th></tr></thead>
+    <tbody><tr><td>0</td><td>Spring Boot + PostgreSQL · pull 모델</td><td>시작점.</td><td>관계형 모델, pull 이 최소</td><td><code>GetHomeFeed</code> 가 <code>FeedSource</code> 포트를 호출하고, 구현은 <code>PullFeedSource</code> (조인 쿼리). <code>FanoutPublisher</code> 는 아직 <code>Noop</code>.</td></tr><tr><td>1</td><td>객체 저장소 (S3) + CDN + presigned URL</td><td>업로드 트래픽이 앱 서버 대역폭과 디스크를 잡아먹고, 이미지 응답이 피드 API 의 지연을 끌어올릴 때.</td><td>바이트는 앱을 거치지 않게</td><td><code>MediaStore</code> 포트의 구현 <code>S3MediaStore</code> (presign 발급). <code>PublishPost</code> 는 URL 만 받는다.</td></tr><tr><td>2</td><td>로드밸런서 + 앱 수평 확장</td><td>앱 CPU 70% 이상, 배포 다운타임.</td><td>무상태 + L7</td><td>코드 변경 없음. Actuator 헬스체크와 graceful shutdown 설정만.</td></tr><tr><td>3</td><td>PostgreSQL 읽기 복제본</td><td>Primary CPU 가 피드 조인 쿼리로 포화.</td><td>결과 캐시보다 쿼리 QPS</td><td>라우팅 <code>DataSource</code>. <code>@Transactional(readOnly = true)</code> 면 Replica.</td></tr><tr><td>4</td><td>Redis 피드 리스트 · fan-out on write</td><td>팔로우 300명 이상 사용자의 피드 p99 가 500ms 를 넘고, Replica 를 늘려도 안 내려올 때.</td><td>비싼 일을 100배 적은 쪽으로</td><td><code>FeedSource</code> 구현을 <code>RedisFeedSource</code> 로. <code>FanoutPublisher</code> 구현 <code>SyncRedisFanout</code>. pull 구현은 폴백으로 남긴다.</td></tr><tr><td>5</td><td>Redis 게시물·사용자 캐시 (MGET hydrate)</td><td>피드 ID 는 Redis 에서 받는데 본문 20개를 채우느라 DB 조회가 요청당 20번.</td><td>왕복 20번을 1번으로</td><td><code>PostCache</code> 구현 <code>RedisPostCache</code>. <code>GetHomeFeed</code> 의 hydrate 단계가 <code>PostCache.getAll(ids)</code> 를 거친다.</td></tr><tr><td>6</td><td>Kafka + fan-out 워커</td><td>게시 API p99 가 팔로워 수에 비례해 수백 ms 를 넘고, 팔로워 1만 명 계정의 게시가 수 초 걸릴 때.</td><td>지연을 팔로워 수에서 분리</td><td><code>FanoutPublisher</code> 구현을 <code>KafkaFanoutPublisher</code> 로. 워커는 같은 코드베이스의 별도 프로필.</td></tr><tr><td>7</td><td>하이브리드 (셀럽은 pull)</td><td>팔로워 100만 계정 하나가 글을 쓰면 fan-out 쓰기 100만 건, 워커가 수 분 밀리고 Redis 쓰기가 폭주할 때.</td><td>상위 0.1% 만 예외 처리</td><td><code>GetHomeFeed</code> 가 <code>FeedSource</code> 두 개 (<code>RedisFeedSource</code>, <code>CelebrityPullSource</code>) 를 머지. <code>PublishPost</code> 가 팔로워 수로 fan-out 여부를 결정.</td></tr><tr><td>8</td><td>DB 샤딩 (posts · follows)</td><td>posts 수십억 행, follows 수백억 행.</td><td>접근 패턴마다 샤드 키</td><td><code>PostRepository</code>, <code>FollowRepository</code> 구현을 샤드 라우팅 버전으로. 포트 시그니처는 그대로.</td></tr><tr><td>9</td><td>랭킹 (피처 저장소 + 배치)</td><td>제품 지표.</td><td>식 하나로 시작, 모델은 나중</td><td><code>RankingPolicy</code> 포트 추가. 구현 <code>ChronologicalRanking</code> → <code>WeightedRanking</code>.</td></tr><tr><td>10</td><td>Redis 카운터 + 이벤트 원장</td><td>좋아요 쓰기가 게시 쓰기의 50배.</td><td>표시용과 원장을 분리</td><td><code>CounterStore</code> 포트 추가. <code>LikePost</code> 가 <code>INCR</code> + 이벤트 발행.</td></tr><tr><td>11</td><td>미디어 처리 워커 (libvips)</td><td>모바일에서 원본 3MB 이미지를 그대로 내려받아 피드 스크롤이 느리고 데이터가 샐 때.</td><td>CPU 작업은 앱 밖으로</td><td>앱 코드 변경 없음. 워커는 별도 서비스. <code>MediaStore</code> 가 파생본 URL 규칙만 안다.</td></tr><tr><td>12</td><td>GeoDNS + 멀티 리전 + API Gateway</td><td>해외 사용자 피드 지연 300ms 이상, 리전 장애 시 전면 중단.</td><td>파생 데이터는 복제 안 함</td><td>코드 변경 없음. 리전별 Kafka 미러링과 워커 배치.</td></tr></tbody>
+  </table></div>
+</section>
+</main>
+
+</body>
+</html>
